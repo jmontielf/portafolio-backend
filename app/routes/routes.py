@@ -1,24 +1,10 @@
-from flask import Flask, render_template, request
-from flask_mysqldb import MySQL
+#* Import the subroutes of the application
+from app.routes.users.usersRoutes import userRoutes
+from app.routes.test.test import testRoutes
+from app.routes.clientType import clientTypeRoutes
 
-routes = Flask(__name__)
-
-routes.config['MYSQL_HOST'] = ''
-routes.config['MYSQL_USER'] = ''
-routes.config['MYSQL_PASSWORD'] = ''
-routes.config['MYSQL_HOST'] = ''
-
-mysql = MySQL(routes)
-
-@routes.route('/')
-def index():
-    return render_template('sign-up.html')
-
-@routes.route('/signup', method=['POST'])
-def sign_up():
-    if request.method == 'POST':
-        request.form['suser']
-        request.form['spassword']
-
-if __name__ == '__main__':
-    routes.run(port = 3000, debug = True)
+#* Unify all the routes and export it to the main.py
+def applicationRoutes(app):
+  userRoutes(app)
+  testRoutes(app)
+  clientTypeRoutes(app)
