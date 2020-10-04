@@ -1,0 +1,10 @@
+runtime: python38 # or python37 for Python 3.7
+service: portafolio-backend-api
+
+instance_class: F1
+
+handlers:
+- url: /.*
+  secure: always
+  redirect_http_response_code: 301
+  script: auto
