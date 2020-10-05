@@ -1,5 +1,5 @@
 from flask import request
-from app.models.users import User
+from app.models.users import (User, UserLogin)
 
 #* Defines the routes for Users
 #? Entry point of users route
@@ -8,9 +8,7 @@ def userRoutes(app):
   def greetUsers():
     return "Hello World from Users!"
 
-#? Route to create a new user
-#TODO: call the model, insert data to model
-#TODO: create insert to DB with data and func from the model
+  #? Route to create a new user
   @app.route("/users/add", methods=['POST'])
   def createUsers():
     requestBody = request.get_json()
@@ -19,3 +17,11 @@ def userRoutes(app):
     newUser.createUser()
 
     return "User Created!"
+
+  #? Make login to the user 
+  @app.route("/users/login", methods=['POST'])
+  def makeLogin():
+    loginBody = request.get_json()
+    newLogin = UserLogin(loginBody)
+    result = newLogin.makeLogin()
+    return result
