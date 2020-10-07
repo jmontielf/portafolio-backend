@@ -44,6 +44,7 @@ class UserLogin:
     self.username = userData["username"]
     self.password = userData["password"]
 
+  #* ATTEMPT LOGIN TO THE APP
   def makeLogin(self):
     sql = "SELECT * FROM USUARIO WHERE USUARIO = :usrName"
     connection = OracleConnect.makeConn()
