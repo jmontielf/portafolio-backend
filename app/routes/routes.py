@@ -1,10 +1,17 @@
 #* Import the subroutes of the application
-from app.routes.users.usersRoutes import userRoutes
-from app.routes.test.test import testRoutes
-from app.routes.clientType import clientTypeRoutes
+from app.controller.usersController import userController
+from app.controller.clientTypeController import clientTypeController
 
 #* Unify all the routes and export it to the main.py
 def applicationRoutes(app):
-  userRoutes(app)
-  testRoutes(app)
-  clientTypeRoutes(app)
+  #? Entrypoint app
+  @app.route("/")
+  def main():
+    return "Welcome from Portfvirtual API"
+
+  #* From route calls to controllers and models
+  #? Routes and controller for the users
+  userController(app)
+
+  #? Routes and controller for client type
+  clientTypeController(app)

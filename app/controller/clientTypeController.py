@@ -1,7 +1,7 @@
 from flask import request
 from app.models.clientType import ClientType
 
-def clientTypeRoutes(app):
+def clientTypeController(app):
   @app.route("/client-type/add", methods=['POST'])
   def createClientType():
     requestBody = request.get_json()

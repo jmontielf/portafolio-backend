@@ -3,7 +3,7 @@ from app.models.users import (User, UserLogin)
 
 #* Defines the routes for Users
 #? Entry point of users route
-def userRoutes(app):
+def userController(app):
   @app.route("/users/")
   def greetUsers():
     return "Hello World from Users!"

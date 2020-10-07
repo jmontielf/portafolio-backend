@@ -11,7 +11,8 @@ applicationRoutes(app)
 
 #* Setup the Flask-JWT-Extended extension
 #TODO: move the key of JWT to a secret file
-app.config['JWT_SECRET_KEY'] = 'portfvirtual2020'  # Change this!
+#TODO: change key
+app.config['JWT_SECRET_KEY'] = 'portfvirtual2020'
 jwt = JWTManager(app)
 
 #* Run the app server 
