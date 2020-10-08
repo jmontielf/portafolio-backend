@@ -12,10 +12,10 @@ def userController(app):
   @app.route("/users/add", methods=['POST'])
   def createUsers():
     requestBody = request.get_json()
-
     newUser = User(requestBody)
     newUser.createUser()
-
+    
+    #TODO: Return response of user created
     return "User Created!"
 
   #? Make login to the user 

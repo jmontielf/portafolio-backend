@@ -28,12 +28,13 @@ class User:
 
   #* CREATE NEW USER 
   def createUser(self):
-    sql = "INSERT INTO USUARIO (USUARIO, CLAVE_USER, ESTADO) VALUES (:1, :2, :3)"
+    # sql = "INSERT INTO USUARIO (USUARIO, CLAVE_USER, ESTADO) VALUES (:1, :2, :3)"
     connection = OracleConnect.makeConn()
 
     try:
       cursor = connection.cursor()
-      cursor.execute(sql, (self.username, self.password, 9))
+      cursor.callproc("USUARIO_security.add_user", [self.username, self.password])
+      # cursor.execute(sql, (self.username, self.password, 9))
       connection.commit()
     finally:
       if connection != "":
