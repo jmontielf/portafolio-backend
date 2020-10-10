@@ -13,10 +13,16 @@ def userController(app):
   def createUsers():
     requestBody = request.get_json()
     newUser = User(requestBody)
-    newUser.createUser()
-    
-    #TODO: Return response of user created
-    return "User Created!"
+    createUser = newUser.createUser()
+    return createUser
+
+  #? Route to update an existent user
+  @app.route("/users/update", methods=['POST'])
+  def updateUser():
+    requestBody = request.get_json()
+    newUser = User(requestBody)
+    updateUser = newUser.updateUser()
+    return updateUser
 
   #? Make login to the user 
   @app.route("/users/login", methods=['POST'])
