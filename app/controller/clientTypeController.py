@@ -20,14 +20,8 @@ def clientTypeController(app):
     clientType = ClientType(initialData)
     allClientTypes = clientType.getAllClientTypes()
 
-
-    # clientTypesResponse = []
-    # for ctype in allClientTypes:
-    #   clientTypesResponse.append({"id": ctype[0], "name": ctype[1], "desc": ctype[2]})
-
-    # json_format = json.dumps(clientTypesResponse) 
-
-    # return json_format
+    # Enable Access-Control-Allow-Origin
+    #allClientTypes.headers.add("Access-Control-Allow-Origin", "*")
 
     return allClientTypes
 
