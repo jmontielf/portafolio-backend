@@ -8,6 +8,13 @@ def userController(app):
   def greetUsers():
     return "Hello World from Users!"
 
+  #? Route to get all users
+  @app.route("/users/get-all", methods=['GET'])
+  def getAllUsers():
+    allUsers = User(allData=False)
+    request = allUsers.getAllUsers()
+    return request
+
   #? Route to create a new user
   @app.route("/users/add", methods=['POST'])
   def createUsers():

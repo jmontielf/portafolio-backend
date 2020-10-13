@@ -7,6 +7,9 @@
 
 ## Install
 
+add details:
+https://oracle.github.io/odpi/doc/installation.html#odpi-c-installation
+
 ```sh
 pip3 install -r requirements.txt
 ```

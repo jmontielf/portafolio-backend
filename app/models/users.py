@@ -9,24 +9,25 @@ class User:
   #* Initialize the object with all the data needed
   def __init__(self, allData):
     #Destructuring the object 
-    Persona = allData["persona"]
-    Usuario = allData["usuario"]
-    Cliente = allData["cliente"]
+    if allData:
+      Persona = allData["persona"]
+      Usuario = allData["usuario"]
+      Cliente = allData["cliente"]
 
-    #Assing the values from the object to the model
-    self.rut = Persona["rut"]
-    self.fono = Persona["fono"]
-    self.name = Persona["nombre"]
-    self.appat = Persona["appat"]
-    self.apmat = Persona["apmat"]
-    self.email = Persona["email"]
-    self.celular = Persona["celular"]
-    self.username = Usuario["username"]
-    self.password = Usuario["password"]
-    self.direccion = Persona["direccion"]
-    self.tipoCliente = Cliente["tipoCliente"]
-    self.id = Usuario["id_usuario"] if hasattr(Usuario, 'id_usuario') == True else ""
-    self.estado = Usuario["estado_usuario"] if hasattr(Usuario, 'estado_usuario') == True else ""
+      #Assing the values from the object to the model
+      self.rut = Persona["rut"]
+      self.fono = Persona["fono"]
+      self.name = Persona["nombre"]
+      self.appat = Persona["appat"]
+      self.apmat = Persona["apmat"]
+      self.email = Persona["email"]
+      self.celular = Persona["celular"]
+      self.username = Usuario["username"]
+      self.password = Usuario["password"]
+      self.direccion = Persona["direccion"]
+      self.tipoCliente = Cliente["tipoCliente"]
+      self.id = Usuario["id_usuario"] if hasattr(Usuario, 'id_usuario') == True else ""
+      self.estado = Usuario["estado_usuario"] if hasattr(Usuario, 'estado_usuario') == True else ""
 
   #* CREATE NEW USER 
   def createUser(self):
@@ -81,6 +82,55 @@ class User:
       if connection != "":
         connection.close()
 
+  #? Listar usuarios (Get users)
+  def getAllUsers(self):
+    sql = "SELECT USR.USUARIO, USR.CLAVE_USER, USR.ESTADO, USR.ID_USUARIO, CLT.ID_TIPOCLIENTE, PRS.RUT, PRS.NOMBRE, PRS.APPAT, PRS.APMAT, PRS.EMAIL, PRS.DIRECCION, PRS.FONO, PRS.CELULAR FROM USUARIO USR JOIN CLIENTE CLT ON USR.ID_USUARIO = CLT.ID_USUARIO JOIN PERSONA PRS ON CLT.ID_PERSONA = PRS.ID_PERSONA"
+    connection = OracleConnect.makeConn()
+
+    try:
+      cursor = connection.cursor()
+      cursor.execute(sql)
+      fetchQuery = cursor.fetchall()
+
+      if len(fetchQuery) > 0:
+        foundUsers = []
+        for row in fetchQuery:
+          #* Create an object with the results and update the main array
+          userObject = {
+            'USUARIO': row[0],
+            'CLAVE_USER': row[1],
+            'ESTADO': row[2],
+            'ID_USUARIO': row[3],
+            'ID_TIPOCLIENTE': row[4],
+            'RUT': row[5],
+            'NOMBRE': row[6],
+            'APPAT': row[7],
+            'APMAT': row[8],
+            'EMAIL': row[9],
+            'DIRECCION': row[10],
+            'FONO': row[11],
+            'CELULAR': row[12]
+          }
+          #* Append the object to the user array
+          foundUsers.append(userObject)
+
+        #* Return array with the users
+        return jsonify(foundUsers), 200
+      else:
+        return jsonify({"err": "Failed to fetch the users"}), 401
+    except cx_Oracle.DatabaseError as e:
+        errorObj, = e.args
+        return jsonify({
+          "err": "An error has ocurred",
+          "Error Code": errorObj.code,
+          "Error Message": errorObj.message
+          }), 401
+    finally:
+      if connection != "":
+        connection.close()
+
+  # TODO: ELIMINAR USUARIO (Desactivar estado)
+  
 
 #? Class defined to attemp user login
 class UserLogin:
