@@ -1,5 +1,6 @@
 #* Import DB Controller
 from flask import jsonify
+import cx_Oracle
 from app.config.db_config import OracleConnect
 from flask_jwt_extended import create_access_token
 
@@ -129,8 +130,26 @@ class User:
       if connection != "":
         connection.close()
 
-  # TODO: ELIMINAR USUARIO (Desactivar estado)
-  
+  #? ELIMINAR USUARIO (Desactivar estado)
+  def disableUser(self, opt):
+    sql = "UPDATE USUARIO SET ESTADO = 0 WHERE USUARIO = :1 AND CLAVE_USER = :2"
+    connection = OracleConnect.makeConn()
+
+    try:
+      cursor = connection.cursor()
+      cursor.execute(sql, (opt['username'], opt['password']))
+      connection.commit()
+      return jsonify({"msg": "User disabled"}), 200
+    except cx_Oracle.DatabaseError as e:
+      errorObj, = e.args
+      return jsonify({
+        "err": "An error has ocurred",
+        "Error Code": errorObj.code,
+        "Error Message": errorObj.message
+        }), 401
+    finally:
+      if connection != "":
+        connection.close()
 
 #? Class defined to attemp user login
 class UserLogin:

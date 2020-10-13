@@ -31,6 +31,16 @@ def userController(app):
     updateUser = newUser.updateUser()
     return updateUser
 
+  #? Route to disable ("delete") an active user
+  @app.route("/users/disable", methods=['POST'])
+  def deactivateUser():
+    requestBody = request.get_json()
+    instanceUsr = User(allData=False)
+    disableUser = instanceUsr.disableUser(requestBody)
+    return disableUser
+
+
+
   #? Make login to the user 
   @app.route("/users/login", methods=['POST'])
   def makeLogin():
