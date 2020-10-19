@@ -1,10 +1,11 @@
 #* Import DB Controller
-from flask import jsonify
+import re
 import cx_Oracle
+from flask import jsonify
+from app.utils.dbCodes import dbCodes
 from app.config.db_config import OracleConnect
 from flask_jwt_extended import create_access_token
-from app.utils.dbCodes import dbCodes
-import re
+from app.utils.serverResponses import returnError, returnActionSuccess, returnDBError
 
 #* Define the type and class of the model 
 #* Assign all the data to the new object
@@ -40,79 +41,74 @@ class User:
     #? Queries to check if user exist before insert
     sqlCheckUser = "SELECT ID_USUARIO FROM USUARIO WHERE USUARIO = :usrName"
     sqlCheckRUT = "SELECT ID_PERSONA FROM PERSONA WHERE RUT = :usrRUT"
-    
     #? Make connection with the DB
     connection = OracleConnect.makeConn()
-
     try:
         cursor = connection.cursor()
         #? Check if user exist
         cursor.execute(sqlCheckUser, usrName=self.username.upper())
         fetchedQuery = cursor.fetchall()
-        if not fetchedQuery:
+        if fetchedQuery:
           #? Check if RUT exist  
           cursor.execute(sqlCheckRUT, usrRUT=self.rut)
           fetchedQuery = cursor.fetchall()
-          if not fetchedQuery:
+          if fetchedQuery:
             #? Do inserts 
             cursor.callproc(sqlUsuario, [self.username, self.password])
             cursor.execute(sqlPersona, (self.rut, self.name, self.appat, self.apmat, self.email, self.direccion, self.fono, self.celular))
             cursor.execute(sqlCliente, (self.username.upper(), self.rut, self.tipoCliente))
             connection.commit()
-            return jsonify({"Message": "Usuario creado con éxito"}), 200
+            return returnActionSuccess("newUSR", "creado")
           else:
             #* RETURN ERROR BY RUT
-            return jsonify({
-              "Error": "Ha ocurrido un error al procesar la solicitud",
-              "Message": "Ya existe un usuario con el rut ingresado"
-            }), 400
+            return returnError("newUSR", "rut")
         else:
           #* RETURN ERROR BY USERNAME
-          return jsonify({
-              "Error": "Ha ocurrido un error al procesar la solicitud",
-              "Message": "Ya existe un usuario con el nombre de usuario ingresado"
-          }), 400
+          return returnError("newUSR", "nombre de usuario")
     except cx_Oracle.DatabaseError as e:
       errorObj, = e.args
-      regexSearch = re.search("(ORA-\d\d\d\d)\w", errorObj.message)
+      regexSearch = GetORAerrCode(errorObj)
       if regexSearch:
         errorCode = regexSearch.group(0)
-        return jsonify({
-          "Error": "Ha ocurrido un error al procesar la solicitud",
-          "Message": "{} : {}".format(errorCode, dbCodes[errorCode])
-        }), 400
+        return returnDBError(errorCode)
       else:
-        return jsonify({
-          "Error": "Ha ocurrido un error al procesar la solicitud",
-          "Message": "Error al crear usuario"
-        }), 400
+        return returnError("actionUSR", "crear")
     finally:
       if connection != "":
         connection.close()
 
   #* UPDATE EXISTENT USER
   #TODO: Update the other tables
+  #TODO: SEPARATE USUARIO, PERSONA AND CLIENTE IN DIFFERENT QUERIES
   def updateUser(self):
     sqlUsuario = "UPDATE USUARIO SET USUARIO = :1, CLAVE_USER = :2, ESTADO = :3 WHERE ID_USUARIO = :4"
-    sqlPersona = "UPDATE PERSONA SET EMAIL = :1, DIRECCION = :2, FONO = :3, CELULAR = :4 WHERE ID_PERSONA = :5"
-    sqlCliente = "UPDATE CLIENTE SET ID_TIPOCLIENTE = :1 WHERE ID_CLIENTE = :2"
+    sqlPersona = "UPDATE PERSONA SET EMAIL = :1, DIRECCION = :2, FONO = :3, CELULAR = :4 WHERE RUT = :5"
+   # sqlCliente = "UPDATE CLIENTE SET ID_TIPOCLIENTE = :1 WHERE ID_CLIENTE = :2"
+    sqlCheckUser = "SELECT ID_USUARIO FROM USUARIO WHERE USUARIO = :usrName"
+
     connection = OracleConnect.makeConn()
 
-    # TODO: GET VALUES FOR PERSONA AND CLIENTE 
+    # TODO: GET VALUES FOR CLIENTE 
     try:
       cursor = connection.cursor()
-      cursor.execute(sqlUsuario, (self.username, self.password, self.estado, self.id))
-      # cursor.execute(sqlPersona, (self.rut, self.name, self.appat, self.apmat, self.email, self.direccion, self.fono, self.celular))
-      # cursor.execute(sqlCliente, (self.username.upper(), self.rut, self.tipoCliente))
-      connection.commit()
-      return jsonify({"msg": "User updated"}), 200
+
+      cursor.execute(sqlCheckUser, usrName=self.username.upper())
+      fetchedQuery = cursor.fetchall()
+
+      if fetchedQuery:
+        cursor.execute(sqlUsuario, (self.username, self.password, self.estado, self.id))
+        cursor.execute(sqlPersona, (self.email, self.direccion, self.fono, self.celular, self.rut))
+        #cursor.execute(sqlCliente, (self.username.upper(), self.rut, self.tipoCliente))
+        connection.commit()
+        return returnActionSuccess("newUSR", "actualizado")
+      else:
+        return returnError("noUSR")
     except cx_Oracle.DatabaseError as e:
       errorObj, = e.args
-      return jsonify({
-        "err": "An error has ocurred",
-        "Error Code": errorObj.code,
-        "Error Message": errorObj.message
-        }), 401
+      regexSearch = GetORAerrCode(errorObj)
+      if regexSearch:
+        errorCode = regexSearch.group(0)
+        return returnDBError(errorCode)
     finally:
       if connection != "":
         connection.close()
@@ -152,14 +148,14 @@ class User:
         #* Return array with the users
         return jsonify(foundUsers), 200
       else:
-        return jsonify({"err": "Failed to fetch the users"}), 401
+        return jsonify({"err": "Failed to fetch the users"}), 400
     except cx_Oracle.DatabaseError as e:
         errorObj, = e.args
         return jsonify({
           "err": "An error has ocurred",
           "Error Code": errorObj.code,
           "Error Message": errorObj.message
-          }), 401
+          }), 400
     finally:
       if connection != "":
         connection.close()
@@ -180,7 +176,7 @@ class User:
         "err": "An error has ocurred",
         "Error Code": errorObj.code,
         "Error Message": errorObj.message
-        }), 401
+        }), 400
     finally:
       if connection != "":
         connection.close()
@@ -222,14 +218,14 @@ class UserLogin:
         #* Return session_token with user data
         return jsonify(userLogin=foundUser), 200
       else:
-        return jsonify({"err": "Invalid username or password"}), 401
+        return jsonify({"err": "Invalid username or password"}), 400
     except cx_Oracle.DatabaseError as e:
       errorObj, = e.args
       return jsonify({
         "err": "An error has ocurred",
         "Error Code": errorObj.code,
         "Error Message": errorObj.message
-        }), 401
+        }), 400
     finally:
       if connection != "":
         connection.close()
