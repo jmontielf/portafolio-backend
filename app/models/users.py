@@ -3,6 +3,8 @@ from flask import jsonify
 import cx_Oracle
 from app.config.db_config import OracleConnect
 from flask_jwt_extended import create_access_token
+from app.utils.dbCodes import dbCodes
+import re
 
 #* Define the type and class of the model 
 #* Assign all the data to the new object
@@ -35,23 +37,55 @@ class User:
     sqlUsuario = "USUARIO_security.add_user"
     sqlPersona = "INSERT INTO PERSONA (RUT, NOMBRE, APPAT, APMAT, EMAIL, DIRECCION, FONO, CELULAR) VALUES (:1, :2, :3, :4, :5, :6, :7, :8)"
     sqlCliente = "INSERT INTO CLIENTE (ID_USUARIO, ID_PERSONA, ID_TIPOCLIENTE) VALUES ((SELECT ID_USUARIO FROM USUARIO WHERE USUARIO = :1), (SELECT ID_PERSONA FROM PERSONA WHERE RUT = :2), :3)"
+    #? Queries to check if user exist before insert
+    sqlCheckUser = "SELECT ID_USUARIO FROM USUARIO WHERE USUARIO = :usrName"
+    sqlCheckRUT = "SELECT ID_PERSONA FROM PERSONA WHERE RUT = :usrRUT"
+    
+    #? Make connection with the DB
     connection = OracleConnect.makeConn()
 
     try:
-      cursor = connection.cursor()
-      cursor.callproc(sqlUsuario, [self.username, self.password])
-      cursor.execute(sqlPersona, (self.rut, self.name, self.appat, self.apmat, self.email, self.direccion, self.fono, self.celular))
-      cursor.execute(sqlCliente, (self.username.upper(), self.rut, self.tipoCliente))
-
-      connection.commit()
-      return jsonify({"msg": "User created"}), 200
+        cursor = connection.cursor()
+        #? Check if user exist
+        cursor.execute(sqlCheckUser, usrName=self.username.upper())
+        fetchedQuery = cursor.fetchall()
+        if not fetchedQuery:
+          #? Check if RUT exist  
+          cursor.execute(sqlCheckRUT, usrRUT=self.rut)
+          fetchedQuery = cursor.fetchall()
+          if not fetchedQuery:
+            #? Do inserts 
+            cursor.callproc(sqlUsuario, [self.username, self.password])
+            cursor.execute(sqlPersona, (self.rut, self.name, self.appat, self.apmat, self.email, self.direccion, self.fono, self.celular))
+            cursor.execute(sqlCliente, (self.username.upper(), self.rut, self.tipoCliente))
+            connection.commit()
+            return jsonify({"Message": "Usuario creado con éxito"}), 200
+          else:
+            #* RETURN ERROR BY RUT
+            return jsonify({
+              "Error": "Ha ocurrido un error al procesar la solicitud",
+              "Message": "Ya existe un usuario con el rut ingresado"
+            }), 400
+        else:
+          #* RETURN ERROR BY USERNAME
+          return jsonify({
+              "Error": "Ha ocurrido un error al procesar la solicitud",
+              "Message": "Ya existe un usuario con el nombre de usuario ingresado"
+          }), 400
     except cx_Oracle.DatabaseError as e:
       errorObj, = e.args
-      return jsonify({
-        "err": "An error has ocurred",
-        "Error Code": errorObj.code,
-        "Error Message": errorObj.message
-        }), 401
+      regexSearch = re.search("(ORA-\d\d\d\d)\w", errorObj.message)
+      if regexSearch:
+        errorCode = regexSearch.group(0)
+        return jsonify({
+          "Error": "Ha ocurrido un error al procesar la solicitud",
+          "Message": "{} : {}".format(errorCode, dbCodes[errorCode])
+        }), 400
+      else:
+        return jsonify({
+          "Error": "Ha ocurrido un error al procesar la solicitud",
+          "Message": "Error al crear usuario"
+        }), 400
     finally:
       if connection != "":
         connection.close()
