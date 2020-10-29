@@ -48,11 +48,11 @@ class User:
         #? Check if user exist
         cursor.execute(sqlCheckUser, usrName=self.username.upper())
         fetchedQuery = cursor.fetchall()
-        if fetchedQuery:
+        if len(fetchedQuery) == 0:
           #? Check if RUT exist  
           cursor.execute(sqlCheckRUT, usrRUT=self.rut)
           fetchedQuery = cursor.fetchall()
-          if fetchedQuery:
+          if len(fetchedQuery) == 0:
             #? Do inserts 
             cursor.callproc(sqlUsuario, [self.username, self.password])
             cursor.execute(sqlPersona, (self.rut, self.name, self.appat, self.apmat, self.email, self.direccion, self.fono, self.celular))
