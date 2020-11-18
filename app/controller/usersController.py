@@ -39,8 +39,6 @@ def userController(app):
     disableUser = instanceUsr.disableUser(requestBody)
     return disableUser
 
-
-
   #? Make login to the user 
   @app.route("/users/login", methods=['POST'])
   def makeLogin():

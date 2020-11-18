@@ -5,11 +5,15 @@ serverErrors = {
   "STD": "Ha ocurrido un error al procesar la solicitud",
   "newUSR": "Ya existe un usuario con el {} ingresado",
   "noUSR": "El usuario no existe",
-  "actionUSR": "Error al {} usuario"
+  "actionUSR": "Error al {} usuario",
+  "AuctionErr": "Ha ocurrido un error al {} la subasta",
+  "AuctionNotFound": "No existe una subasta con el ID proporcionado",
+  "AuctionNotID": "Debe proporcionar un ID para ejecutar la acción"
 }
 
 serverSuccess = {
   "newUSR": "Usuario {} con éxito",
+  "Auction": "Subasta {} con éxito"
 }
 
 def GetORAerrCode(errorObj):
