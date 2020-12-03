@@ -3,29 +3,31 @@ import cx_Oracle
 from flask import jsonify
 from app.utils.dbCodes import dbCodes
 from app.config.db_config import OracleConnect
-from app.utils.serverResponses import returnError, returnActionSuccess, returnDBError
+from app.utils.serverResponses import returnError, returnActionSuccess, returnDBError, GetORAerrCode
+from app.models.productsModel import ProductModel
 
 class AuctionModel:
-  def __init__(self, auctionData=[False], delete=False):
-    if not delete:
-      self.value = auctionData['value']
-      self.status = auctionData['status']
-      self.endDate = auctionData['endDate']
-      self.desc = auctionData['description']
-      self.startDate = auctionData['startData']
-      self.id_trans = auctionData['idTransportista']
-      self.id_subasta = auctionData['id_subasta'] if hasattr(auctionData, 'id_subasta') == True else ""
-    else:
-      self.id_subasta = auctionData['id_subasta'] if hasattr(auctionData, 'id_subasta') == True else ""
+  def __init__(self, requestData):
+    #self.endDate = requestData['endDate']
+    self.client_id = requestData['clientID']
+    self.auctionType = requestData['auctionType']
+    self.city = requestData['city']
+    self.country = requestData['country']
+    self.address = requestData['address']
 
   #* CREATE NEW AUCTION
-  def createAuction(self):
-    sqlNewAuction = "INSERT INTO SUBASTA (VALOR, DESCRIPCION, ID_TRANSPORTISTA, ESTADO, FEC_INICIO, FEC_TERMINO) VALUES (:1, :2, :3, :4, :5, :6)"
+  def createAuction(self, productData):
+    addProducts = ProductModel(productData)
+    sqlNewAuction = "INSERT INTO SUBASTA (FEC_TERMINO, ID_CLIENTE, TIPO_SUBASTA, CIUDAD, PAIS, DIRECCION) VALUES (TO_DATE('1989-12-09','YYYY-MM-DD'), :1, :2, :3, :4, :5)"
+    #sqlNewAuction = "INSERT INTO SUBASTA (FEC_TERMINO, ID_CLIENTE, TIPO_SUBASTA, CIUDAD, PAIS, DIRECCION) VALUES (:1, :2, :3, :4, :5, :6)"
+
     connection = OracleConnect.makeConn()
     #? Attemp creation of new auction
     try:
-      cursor = connection.makeConn()
-      cursor.execute(sqlNewAuction, (self.value, self.desc, self.id_trans, self.status, self.startData, self.endDate))
+      cursor = connection.cursor()
+      #! Add end date 
+      cursor.execute(sqlNewAuction, (self.client_id, self.auctionType, self.city, self.country, self.address))
+      addProducts.createProduct()
       connection.commit()
       return returnActionSuccess("Auction", "creada")
     except cx_Oracle.DatabaseError as e:
@@ -70,9 +72,9 @@ class AuctionModel:
         if regexSearch:
           errorCode = regexSearch.group(0)
           return returnDBError(errorCode)
-      finally:
-        if connection != "":
-          connection.close()
+    finally:
+      if connection != "":
+        connection.close()
 
   #* DELETE AUCTION
   def deleteAuction(self):
@@ -104,9 +106,9 @@ class AuctionModel:
         if regexSearch:
           errorCode = regexSearch.group(0)
           return returnDBError(errorCode)
-      finally:
-        if connection != "":
-          connection.close()
+    finally:
+      if connection != "":
+        connection.close()
 
   #* DISABLE AUCTION
   def disableAuction(self):
@@ -138,9 +140,9 @@ class AuctionModel:
         if regexSearch:
           errorCode = regexSearch.group(0)
           return returnDBError(errorCode)
-      finally:
-        if connection != "":
-          connection.close()
+    finally:
+      if connection != "":
+        connection.close()
 
 #* GET ALL AUCTIONS
 def getAllAuctions():
@@ -178,6 +180,6 @@ def getAllAuctions():
           "Error Code": errorObj.code,
           "Error Message": errorObj.message
           }), 400
-    finally:
-      if connection != "":
-        connection.close()
+  finally:
+    if connection != "":
+      connection.close()

@@ -6,8 +6,9 @@ def auctionsController(app):
   @app.route("/auctions/create", methods=['POST'])
   def createAuction():
     requestBody = request.get_json()
-    auctionInstance = AuctionModel(requestBody)
-    newAuction = auctionInstance.createAuction()
+    print(requestBody)
+    auctionInstance = AuctionModel(requestBody["auction"])
+    newAuction = auctionInstance.createAuction(requestBody["products"])
     return newAuction
 
   @app.route("/auctions", methods=['GET'])
@@ -16,6 +17,8 @@ def auctionsController(app):
     return getAuctions
 
 # ! TODO
+#! CORREGIR CONSULTAS 
+#! AGREGAR VENTA LOCAL - VENTA EXTRANJERA / DETALLE DE VENTAS
   @app.route("/auctions/update", methods=['POST'])
   def updateAuctions():
     return "1"

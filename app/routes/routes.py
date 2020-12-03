@@ -2,6 +2,7 @@
 from app.controller.usersController import userController
 from app.controller.clientTypeController import clientTypeController
 from app.controller.auctionsController import auctionsController
+from app.controller.productsController import productsController
 
 #* Unify all the routes and export it to the main.py
 def applicationRoutes(app):
@@ -17,3 +18,6 @@ def applicationRoutes(app):
   clientTypeController(app)
   #? Routes and controller for auctions
   auctionsController(app)
+  #? Routes and controller for products
+  productsController(app)
+  

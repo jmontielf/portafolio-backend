@@ -1,5 +1,6 @@
 from .dbCodes import dbCodes
 from flask import jsonify
+import re
 
 serverErrors = {
   "STD": "Ha ocurrido un error al procesar la solicitud",
@@ -8,17 +9,20 @@ serverErrors = {
   "actionUSR": "Error al {} usuario",
   "AuctionErr": "Ha ocurrido un error al {} la subasta",
   "AuctionNotFound": "No existe una subasta con el ID proporcionado",
-  "AuctionNotID": "Debe proporcionar un ID para ejecutar la acción"
+  "AuctionNotID": "Debe proporcionar un ID para ejecutar la acción",
+  "ProductErr": "Ha ocurrido un error al {} los productos",
 }
 
 serverSuccess = {
   "newUSR": "Usuario {} con éxito",
-  "Auction": "Subasta {} con éxito"
+  "Auction": "Subasta {} con éxito",
+  "Producto": "Producto {} con éxito"
 }
 
 def GetORAerrCode(errorObj):
   regexSearch = re.search("(ORA-\d\d\d\d)\w", errorObj.message)
   if regexSearch:
+    print(regexSearch)
     return regexSearch.group(0)
   else:
     return None
