@@ -85,15 +85,15 @@ def productsPerAuction(details):
       cursor = connection.cursor()
       cursor.execute(sql, (auctionID, product["productID"]))
       connection.commit()
-      return returnActionSuccess("SubOferta", "creado")
+      print("Ascociar ok!")
     except cx_Oracle.DatabaseError as e:
         errorObj, = e.args
         regexSearch = GetORAerrCode(errorObj)
         if regexSearch:
           errorCode = regexSearch.group(0)
-          return returnDBError(errorCode)
+          print("Error again")
         else:
-          return returnError("SubOfertaErr", "asociar")
+          print("Error al asociar productos")
     finally:
       if connection != "":
           connection.close()
