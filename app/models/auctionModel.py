@@ -4,7 +4,7 @@ from flask import jsonify
 from app.utils.dbCodes import dbCodes
 from app.config.db_config import OracleConnect
 from app.utils.serverResponses import returnError, returnActionSuccess, returnDBError, GetORAerrCode
-from app.models.productsModel import ProductModel
+from app.models.productsModel import ProductModel, productsPerAuction
 
 class AuctionModel:
   def __init__(self, requestData):
@@ -17,9 +17,8 @@ class AuctionModel:
 
   #* CREATE NEW AUCTION
   def createAuction(self, productData):
-    addProducts = ProductModel(productData)
     sqlNewAuction = "INSERT INTO SUBASTA (FEC_TERMINO, ID_CLIENTE, TIPO_SUBASTA, CIUDAD, PAIS, DIRECCION) VALUES (TO_DATE('1989-12-09','YYYY-MM-DD'), :1, :2, :3, :4, :5)"
-    #sqlNewAuction = "INSERT INTO SUBASTA (FEC_TERMINO, ID_CLIENTE, TIPO_SUBASTA, CIUDAD, PAIS, DIRECCION) VALUES (:1, :2, :3, :4, :5, :6)"
+    sqlGetLastAuctionID = "SELECT ID_SUBASTA FROM (SELECT * FROM SUBASTA ORDER BY ID_SUBASTA DESC) WHERE ROWNUM = 1"
 
     connection = OracleConnect.makeConn()
     #? Attemp creation of new auction
@@ -27,8 +26,20 @@ class AuctionModel:
       cursor = connection.cursor()
       #! Add end date 
       cursor.execute(sqlNewAuction, (self.client_id, self.auctionType, self.city, self.country, self.address))
-      addProducts.createProduct()
       connection.commit()
+
+      #? FETCH ID FROM LAST INSERT
+      cursor = connection.cursor()
+      cursor.execute(sqlGetLastAuctionID)
+      fetchSub = cursor.fetchall()
+
+      if(fetchSub and fetchSub[0][0]):
+        details = {
+          "idLastAuction": fetchSub[0][0],
+          "products": productData
+        }
+        productsPerAuction(details)
+
       return returnActionSuccess("Auction", "creada")
     except cx_Oracle.DatabaseError as e:
         errorObj, = e.args

@@ -11,12 +11,14 @@ serverErrors = {
   "AuctionNotFound": "No existe una subasta con el ID proporcionado",
   "AuctionNotID": "Debe proporcionar un ID para ejecutar la acción",
   "ProductErr": "Ha ocurrido un error al {} los productos",
+  "SubOfertaErr": "Ha ocurrido un error al {} los productos con la subasta"
 }
 
 serverSuccess = {
   "newUSR": "Usuario {} con éxito",
   "Auction": "Subasta {} con éxito",
-  "Producto": "Producto {} con éxito"
+  "Producto": "Producto {} con éxito",
+  "SubOferta": "Productos asociados a la subasta con éxito"
 }
 
 def GetORAerrCode(errorObj):

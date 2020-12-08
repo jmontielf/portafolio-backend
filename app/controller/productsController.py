@@ -7,3 +7,11 @@ def productsController(app):
   def getAvailableProducts():
     products = getAllAvailableProducts()
     return products
+
+  #! revisar con postman
+  @app.route("/products/create", methods=['POST'])
+  def createProduct():
+    requestBody = request.get_json()
+    productInstance = ProductModel(requestBody)
+    newproduct = productInstance.createProduct()
+    return newproduct

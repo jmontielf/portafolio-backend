@@ -71,3 +71,30 @@ def getAllAvailableProducts():
   finally:
     if connection != "":
       connection.close()
+
+#? Call this function from insert auction
+def productsPerAuction(details):
+  products = details['products']
+  auctionID = details['idLastAuction']
+  sql = 'INSERT INTO SUB_OFERTA (ID_SUBASTA, ID_PRODUCTO) VALUES (:1, :2)'
+
+  for product in products:
+    connection = OracleConnect.makeConn()
+      #? Attempt association of products and auctions
+    try:
+      cursor = connection.cursor()
+      cursor.execute(sql, (auctionID, product["productID"]))
+      connection.commit()
+      return returnActionSuccess("SubOferta", "creado")
+    except cx_Oracle.DatabaseError as e:
+        errorObj, = e.args
+        regexSearch = GetORAerrCode(errorObj)
+        if regexSearch:
+          errorCode = regexSearch.group(0)
+          return returnDBError(errorCode)
+        else:
+          return returnError("SubOfertaErr", "asociar")
+    finally:
+      if connection != "":
+          connection.close()
+      

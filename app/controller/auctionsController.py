@@ -6,7 +6,6 @@ def auctionsController(app):
   @app.route("/auctions/create", methods=['POST'])
   def createAuction():
     requestBody = request.get_json()
-    print(requestBody)
     auctionInstance = AuctionModel(requestBody["auction"])
     newAuction = auctionInstance.createAuction(requestBody["products"])
     return newAuction
