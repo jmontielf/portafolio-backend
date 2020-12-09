@@ -8,7 +8,10 @@ from app.models.productsModel import ProductModel, productsPerAuction
 
 class AuctionModel:
   def __init__(self, requestData):
-    #self.endDate = requestData['endDate']
+    self.value = requestData['value']
+    self.desc = requestData['desc']
+    self.startDate = requestData['startDate']
+    self.endDate = requestData['endDate']
     self.client_id = requestData['clientID']
     self.auctionType = requestData['auctionType']
     self.city = requestData['city']
@@ -17,15 +20,14 @@ class AuctionModel:
 
   #* CREATE NEW AUCTION
   def createAuction(self, productData):
-    sqlNewAuction = "INSERT INTO SUBASTA (FEC_TERMINO, ID_CLIENTE, TIPO_SUBASTA, CIUDAD, PAIS, DIRECCION) VALUES (TO_DATE('1989-12-09','YYYY-MM-DD'), :1, :2, :3, :4, :5)"
+    sqlNewAuction = "INSERT INTO SUBASTA (VALOR, DESCRIPCION, ESTADO, FEC_INICIO, FEC_TERMINO, ID_CLIENTE, TIPO_SUBASTA, CIUDAD, PAIS, DIRECCION) VALUES (:1, :2, :3, :4, :5, :6, :7, :8, :9, :10)"
     sqlGetLastAuctionID = "SELECT ID_SUBASTA FROM (SELECT * FROM SUBASTA ORDER BY ID_SUBASTA DESC) WHERE ROWNUM = 1"
 
     connection = OracleConnect.makeConn()
     #? Attemp creation of new auction
     try:
       cursor = connection.cursor()
-      #! Add end date 
-      cursor.execute(sqlNewAuction, (self.client_id, self.auctionType, self.city, self.country, self.address))
+      cursor.execute(sqlNewAuction, (self.value, self.desc, 1, self.startDate, self.endDate, self.client_id, self.auctionType, self.city, self.country, self.address))
       connection.commit()
 
       #? FETCH ID FROM LAST INSERT
@@ -184,6 +186,32 @@ def getAllAuctions():
       return jsonify(foundAuctions), 200
     else:
       return jsonify({"err": "Failed to fetch the users"}), 400
+  except cx_Oracle.DatabaseError as e:
+        errorObj, = e.args
+        return jsonify({
+          "err": "An error has ocurred",
+          "Error Code": errorObj.code,
+          "Error Message": errorObj.message
+          }), 400
+  finally:
+    if connection != "":
+      connection.close()
+
+
+#* Transport goes into the auction
+def auctionDetails(auctionDetails):
+  aucValue = auctionDetails['value']
+  aucTransport = auctionDetails['transport_type']
+  aucIDCarrier = auctionDetails['id_transportista']
+  aucIDAuction = auctionDetails['id_subasta']
+  sqlInsertCarrier = "INSERT INTO DETALLE_SUBASTA (OFERTA, TRANSPORTE_TIPO, ID_TRANSPORTISTA, ID_SUBASTA, GANADORA) VALUES (:1, :2, :3, :4, 0)"
+  #? Make connection
+  connection = OracleConnect.makeConn()
+  try:
+    cursor = connection.cursor()
+    cursor.execute(sqlInsertCarrier, (aucValue, aucTransport, aucIDCarrier, aucIDAuction))
+    connection.commit()
+    return returnActionSuccess("Participation")
   except cx_Oracle.DatabaseError as e:
         errorObj, = e.args
         return jsonify({

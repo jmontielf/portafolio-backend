@@ -9,25 +9,22 @@ import json
 class ProductModel:
   def __init__(self, productData):
     self.name = productData['name']
-    #self.desc = productData['desc']
+    self.desc = productData['desc']
     self.price = productData['price']
     self.quality = productData['quality']
     self.registerDate = productData['registerDate']
-    #self.data = productData['data']
-    #self.id_comerciante = productData['id_comerciante']
+    self.id_comerciante = productData['id_comerciante']
     self.stock = productData['stock']
     self.productType = productData['productType']
 
   def createProduct(self):
-    sql = "INSERT INTO PRODUCTO (NOMBRE, PRECIO, CALIDAD, FEC_INGRESO, STOCK, TIPO_PRODUCTO) VALUES (:1, :2, :3, TO_DATE('2020-11-25 23:43:04', 'YYYY-MM-DD HH24:MI:SS'), :4, :5)"
-    #"INSERT INTO "ADMIN_FERIA"."PRODUCTO" (NOMBRE, PRECIO, CALIDAD, FEC_INGRESO, STOCK, TIPO_PRODUCTO) 
-    # VALUES ('PAPAYA', '$200', 'EXCELENTE', TO_DATE('2020-11-25 23:43:04', 'YYYY-MM-DD HH24:MI:SS'), '200', 'FRUTA')"
+    sql = "INSERT INTO PRODUCTO (NOMBRE, DESCRIPCION, PRECIO, CALIDAD, FEC_INGRESO, ID_COMERCIANTE, STOCK, TIPO_PRODUCTO) VALUES (:1, :2, :3, :4, :5, :6, :7, :8)"
     
     connection = OracleConnect.makeConn()
     #? Attemp creation of new products
     try:
       cursor = connection.cursor()
-      cursor.execute(sql, (self.name, self.price, self.quality, self.stock, self.productType))
+      cursor.execute(sql, (self.name, self.desc, self.price, self.quality, self.registerDate, self.id_comerciante, self.stock, self.productType))
       connection.commit()
       return returnActionSuccess("Producto", "creado")
     except cx_Oracle.DatabaseError as e:

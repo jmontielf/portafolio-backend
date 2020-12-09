@@ -18,7 +18,8 @@ serverSuccess = {
   "newUSR": "Usuario {} con éxito",
   "Auction": "Subasta {} con éxito",
   "Producto": "Producto {} con éxito",
-  "SubOferta": "Productos asociados a la subasta con éxito"
+  "SubOferta": "Productos asociados a la subasta con éxito",
+  "Participation": "Participación ingresada con éxito"
 }
 
 def GetORAerrCode(errorObj):
@@ -44,7 +45,7 @@ def returnDBError(errorCode):
   }), 400
   return response
 
-def returnActionSuccess(messageCode, stringVariable):
+def returnActionSuccess(messageCode, stringVariable=None):
   response = jsonify({
     "Message": serverSuccess[messageCode].format(stringVariable)
   }), 200
