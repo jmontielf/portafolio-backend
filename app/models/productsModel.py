@@ -42,7 +42,8 @@ class ProductModel:
     return "created"
 
 def getAllAvailableProducts():
-  sql = "SELECT DISTINCT NOMBRE FROM PRODUCTO ORDER BY NOMBRE ASC"
+  # sql = "SELECT DISTINCT NOMBRE FROM PRODUCTO ORDER BY NOMBRE ASC"
+  sql = "SELECT NOMBRE, DESCRIPCION, PRECIO, CALIDAD, FEC_INGRESO, ID_COMERCIANTE, STOCK, TIPO_PRODUCTO FROM PRODUCTO"
   connection = OracleConnect.makeConn()
 
   try:
@@ -53,7 +54,18 @@ def getAllAvailableProducts():
 
     if len(result) > 0:
       for product in result:
-        productList.append(product[0])
+        productObject = {
+          'NOMBRE': product[0], 
+          'DESCRIPCION': product[1], 
+          'PRECIO': product[2], 
+          'CALIDAD': product[3], 
+          'FEC_INGRESO': product[4], 
+          'ID_COMERCIANTE': product[5], 
+          'STOCK': product[6], 
+          'TIPO_PRODUCTO': product[7]
+        }
+        productList.append(productObject)
+        # productList.append(product[0])
       return jsonify(productList), 200
     else:
       return jsonify({"err": "Failed to fetch the products"}), 400

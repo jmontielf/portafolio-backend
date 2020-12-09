@@ -27,7 +27,7 @@ class AuctionModel:
     #? Attemp creation of new auction
     try:
       cursor = connection.cursor()
-      cursor.execute(sqlNewAuction, (self.value, self.desc, 1, self.startDate, self.endDate, self.client_id, self.auctionType, self.city, self.country, self.address))
+      cursor.execute(sqlNewAuction, (self.value, self.desc, 0, self.startDate, self.endDate, self.client_id, self.auctionType, self.city, self.country, self.address))
       connection.commit()
 
       #? FETCH ID FROM LAST INSERT
@@ -349,4 +349,27 @@ def getAuctionWinner(winnerParams):
   finally:
     if connection != "":
       connection.close()
-      
+
+def auctionUpdate(auctionVal):
+  sqlUpdate = "UPDATE SUBASTA SET ESTADO = :1 WHERE ID_SUBASTA = :2"
+  id_subasta = auctionVal['id_subasta']
+  id_estado = auctionVal['id_estado']
+
+  #* Attempt Update && Insert
+  #* Make connection
+  connection = OracleConnect.makeConn()
+  try:
+    cursor = connection.cursor()
+    cursor.execute(sqlUpdate, (id_estado, id_subasta))
+    connection.commit()
+    return returnActionSuccess("Auction", "actualizada")
+  except cx_Oracle.DatabaseError as e:
+        errorObj, = e.args
+        return jsonify({
+          "err": "An error has ocurred",
+          "Error Code": errorObj.code,
+          "Error Message": errorObj.message
+          }), 400
+  finally:
+    if connection != "":
+      connection.close()
