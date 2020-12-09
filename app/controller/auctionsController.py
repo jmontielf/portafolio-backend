@@ -1,5 +1,5 @@
 from flask import request
-from app.models.auctionModel import getAllAuctions, AuctionModel, auctionDetails
+from app.models.auctionModel import getAllAuctions, AuctionModel, auctionDetails, getProductPerAuction, getCarrierPerAuction
 
 def auctionsController(app):
   #? CREATE AUCTION
@@ -14,6 +14,18 @@ def auctionsController(app):
   def obtainAllAuctions():
     getAuctions = getAllAuctions()
     return getAuctions
+
+  @app.route("/auctions/products", methods=['POST'])
+  def productsPerAuction():
+    requestBody = request.get_json()
+    AucProduct = getProductPerAuction(requestBody['auction_id'])
+    return AucProduct
+
+  @app.route("/auctions/transport", methods=['POST'])
+  def carriersPerAuction():
+    requestBody = request.get_json()
+    AucCarrier = getCarrierPerAuction(requestBody['auction_id'])
+    return AucCarrier
 
   @app.route("/auction/participate", methods=['POST'])
   def participateAuction():

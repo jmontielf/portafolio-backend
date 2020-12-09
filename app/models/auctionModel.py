@@ -191,7 +191,7 @@ def getAllAuctions():
       #? Return array with all auctions objects
       return jsonify(foundAuctions), 200
     else:
-      return jsonify({"err": "Failed to fetch the users"}), 400
+      return jsonify({"err": "Failed to fetch the auctions"}), 400
   except cx_Oracle.DatabaseError as e:
         errorObj, = e.args
         return jsonify({
@@ -203,6 +203,83 @@ def getAllAuctions():
     if connection != "":
       connection.close()
 
+
+def getCarrierPerAuction(request):
+  sql = "SELECT DTS.* FROM SUBASTA SU JOIN DETALLE_SUBASTA DTS ON SU.ID_SUBASTA = DTS.ID_SUBASTA WHERE SU.ID_SUBASTA = :idSubasta"
+  connection = OracleConnect.makeConn()
+  #? Attemp creation of new auction
+  try:
+    cursor = connection.cursor()
+    cursor.execute(sql, idSubasta = request)
+    fetchQuery = cursor.fetchall()
+
+    if len(fetchQuery) > 0:
+      #do something
+      foundAuctions = []
+      for row in fetchQuery:
+        auctionObj = {
+          'ID_DETALLE_SUBASTA': row[0],	
+          'OFERTA': row[1],	
+          'TRANSPORTE_TIPO': row[2],	
+          'ID_TRANSPORTISTA': row[3],
+          'ID_SUBASTA': row[4],
+          'GANADORA': row[5]
+        }
+        #? Append object to the array
+        foundAuctions.append(auctionObj)
+      #? Return array with all auctions objects
+      return jsonify(foundAuctions), 200
+    else:
+      return jsonify({"err": "Failed to fetch the products"}), 400
+  except cx_Oracle.DatabaseError as e:
+      errorObj, = e.args
+      regexSearch = GetORAerrCode(errorObj)
+      if regexSearch:
+        errorCode = regexSearch.group(0)
+        return returnDBError(errorCode)
+      else:
+        return returnError("AuctionErr", "crear")
+  finally:
+    if connection != "":
+        connection.close()
+
+
+def getProductPerAuction(request):
+  sql = "SELECT SU.ID_SUBASTA, PRD.ID_PRODUCTO, PRD.NOMBRE, PRD.PRECIO FROM SUBASTA SU JOIN SUB_OFERTA SBO ON SU.ID_SUBASTA = SBO.ID_SUBASTA JOIN PRODUCTO PRD ON SBO.ID_PRODUCTO = PRD.ID_PRODUCTO WHERE SU.ID_SUBASTA = :idSubasta"
+  connection = OracleConnect.makeConn()
+  #? Attemp creation of new auction
+  try:
+    cursor = connection.cursor()
+    cursor.execute(sql, idSubasta = request)
+    fetchQuery = cursor.fetchall()
+
+    if len(fetchQuery) > 0:
+      #do something
+      foundAuctions = []
+      for row in fetchQuery:
+        auctionObj = {
+          'ID_SUBASTA': row[0],	
+          'ID_PRODUCTO': row[1],	
+          'NOMBRE': row[2],	
+          'PRECIO': row[3]
+        }
+        #? Append object to the array
+        foundAuctions.append(auctionObj)
+      #? Return array with all auctions objects
+      return jsonify(foundAuctions), 200
+    else:
+      return jsonify({"err": "Failed to fetch the products"}), 400
+  except cx_Oracle.DatabaseError as e:
+      errorObj, = e.args
+      regexSearch = GetORAerrCode(errorObj)
+      if regexSearch:
+        errorCode = regexSearch.group(0)
+        return returnDBError(errorCode)
+      else:
+        return returnError("AuctionErr", "crear")
+  finally:
+    if connection != "":
+        connection.close()
 
 #* Transport goes into the auction
 def auctionDetails(auctionDetails):
