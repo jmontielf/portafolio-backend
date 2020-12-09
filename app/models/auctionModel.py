@@ -305,3 +305,47 @@ def auctionDetails(auctionDetails):
   finally:
     if connection != "":
       connection.close()
+
+
+def getAuctionWinner(winnerParams):
+  #* Define queries
+  sqlUpdateSubasta = "UPDATE SUBASTA SET ID_TRANSPORTISTA = :1, ESTADO = 2 WHERE ID_SUBASTA = :2"
+  sqlUpdateDetalle = "UPDATE DETALLE_SUBASTA SET GANADORA = 1 WHERE ID_SUBASTA = :1 AND ID_TRANSPORTISTA = :2"
+  sqlInsertNacional = "INSERT INTO VENTA_LOCAL (DESCRIPCION_VENTA, BRUTO, IVA, NETO, ID_CLIENTE, ID_SUBASTA) VALUES ( :1, :2, :3, :4, :5, :6)"
+  sqlInsertInternacional = "INSERT INTO VENTA_EXTRANJERA (DESCRIPCION_VENTA, BRUTO, IVA, NETO, ID_CLIENTE, ID_SUBASTA) VALUES ( :1, :2, :3, :4, :5, :6)"
+
+  #* Get values from request
+  id_subasta = winnerParams["id_subasta"] 
+  id_cliente = winnerParams["id_cliente"]  
+  id_transportista = winnerParams["id_transportista"]  
+  descripcion_venta = winnerParams["DESCRIPCION_VENTA"]   
+  bruto = winnerParams["BRUTO"]   
+  iva = winnerParams["IVA"]   
+  neto = winnerParams["NETO"]  
+  id_cliente = winnerParams["ID_CLIENTE"]  
+  id_subasta = winnerParams["ID_SUBASTA"]  
+  tipo_venta = winnerParams["TIPO_VENTA"]  
+
+  #* Attempt Update && Insert
+  #* Make connection
+  connection = OracleConnect.makeConn()
+  try:
+    cursor = connection.cursor()
+    cursor.execute(sqlUpdateSubasta, (id_transportista, id_subasta))
+    cursor.execute(sqlUpdateDetalle, (id_subasta, id_transportista))
+    if tipo_venta == 'NAC':
+      cursor.execute(sqlInsertNacional, (descripcion_venta, bruto, iva, neto, id_cliente, id_subasta))
+    else:
+      cursor.execute(sqlInsertInternacional, (descripcion_venta, bruto, iva, neto, id_cliente, id_subasta))
+    connection.commit()
+    return returnActionSuccess("Winner")
+  except cx_Oracle.DatabaseError as e:
+        errorObj, = e.args
+        return jsonify({
+          "err": "An error has ocurred",
+          "Error Code": errorObj.code,
+          "Error Message": errorObj.message
+          }), 400
+  finally:
+    if connection != "":
+      connection.close()

@@ -19,7 +19,8 @@ serverSuccess = {
   "Auction": "Subasta {} con éxito",
   "Producto": "Producto {} con éxito",
   "SubOferta": "Productos asociados a la subasta con éxito",
-  "Participation": "Participación ingresada con éxito"
+  "Participation": "Participación ingresada con éxito",
+  "Winner": "Ganador de la subasta actualizado con éxito"
 }
 
 def GetORAerrCode(errorObj):
