@@ -115,7 +115,7 @@ class User:
 
   #? Listar usuarios (Get users)
   def getAllUsers(self):
-    sql = "SELECT USR.USUARIO, USR.CLAVE_USER, USR.ESTADO, USR.ID_USUARIO, CLT.ID_TIPOCLIENTE, PRS.RUT, PRS.NOMBRE, PRS.APPAT, PRS.APMAT, PRS.EMAIL, PRS.DIRECCION, PRS.FONO, PRS.CELULAR FROM USUARIO USR JOIN CLIENTE CLT ON USR.ID_USUARIO = CLT.ID_USUARIO JOIN PERSONA PRS ON CLT.ID_PERSONA = PRS.ID_PERSONA"
+    sql = "SELECT USR.USUARIO, USR.CLAVE_USER, USR.ESTADO, USR.ID_USUARIO, CLT.ID_TIPOCLIENTE, PRS.RUT, PRS.NOMBRE, PRS.APPAT, PRS.APMAT, PRS.EMAIL, PRS.DIRECCION, PRS.FONO, PRS.CELULAR, CLT.ID_CLIENTE FROM USUARIO USR JOIN CLIENTE CLT ON USR.ID_USUARIO = CLT.ID_USUARIO JOIN PERSONA PRS ON CLT.ID_PERSONA = PRS.ID_PERSONA"
     connection = OracleConnect.makeConn()
 
     try:
@@ -140,7 +140,8 @@ class User:
             'EMAIL': row[9],
             'DIRECCION': row[10],
             'FONO': row[11],
-            'CELULAR': row[12]
+            'CELULAR': row[12],
+            'ID_CLIENTE': row[13]
           }
           #* Append the object to the user array
           foundUsers.append(userObject)
