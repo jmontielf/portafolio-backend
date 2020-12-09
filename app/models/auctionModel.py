@@ -349,3 +349,4 @@ def getAuctionWinner(winnerParams):
   finally:
     if connection != "":
       connection.close()
+      
