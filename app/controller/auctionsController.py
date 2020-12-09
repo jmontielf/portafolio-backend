@@ -11,7 +11,7 @@ def auctionsController(app):
     return newAuction
 
   @app.route("/auctions", methods=['GET'])
-  def getAllAuctions():
+  def obtainAllAuctions():
     getAuctions = getAllAuctions()
     return getAuctions
 

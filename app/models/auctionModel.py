@@ -173,12 +173,18 @@ def getAllAuctions():
       foundAuctions = []
       for row in fetchQuery:
         auctionObj = {
-          'ID_SUBASTA': row[0],
-          'DESCRIPCION': row[1],
-          'ID_TRANSPORTISTA': row[2],
-          'ESTADO': row[3],
-          'FEC_INICIO': row[4],
-          'FEC_TERMINO': row[5]
+          'ID_SUBASTA': row[0],	
+          'VALOR': row[1],	
+          'DESCRIPCION': row[2],	
+          'ID_TRANSPORTISTA': row[3],	
+          'ESTADO': row[4],	
+          'FEC_INICIO': row[5],	
+          'FEC_TERMINO': row[6],	
+          'ID_CLIENTE': row[7],	
+          'TIPO_SUBASTA': row[8],	
+          'CIUDAD': row[9],	
+          'PAIS': row[10],	
+          'DIRECCION': row[11]
         }
         #? Append object to the array
         foundAuctions.append(auctionObj)
