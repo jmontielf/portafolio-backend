@@ -43,7 +43,7 @@ class ProductModel:
 
 def getAllAvailableProducts():
   # sql = "SELECT DISTINCT NOMBRE FROM PRODUCTO ORDER BY NOMBRE ASC"
-  sql = "SELECT NOMBRE, DESCRIPCION, PRECIO, CALIDAD, FEC_INGRESO, ID_COMERCIANTE, STOCK, TIPO_PRODUCTO FROM PRODUCTO"
+  sql = "SELECT NOMBRE, DESCRIPCION, PRECIO, CALIDAD, FEC_INGRESO, ID_COMERCIANTE, STOCK, TIPO_PRODUCTO, ID_PRODUCTO FROM PRODUCTO"
   connection = OracleConnect.makeConn()
 
   try:
@@ -62,7 +62,8 @@ def getAllAvailableProducts():
           'FEC_INGRESO': product[4], 
           'ID_COMERCIANTE': product[5], 
           'STOCK': product[6], 
-          'TIPO_PRODUCTO': product[7]
+          'TIPO_PRODUCTO': product[7],
+          'ID_PRODUCTO': product[8]
         }
         productList.append(productObject)
         # productList.append(product[0])
