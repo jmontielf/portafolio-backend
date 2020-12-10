@@ -230,7 +230,7 @@ def getCarrierPerAuction(request):
       #? Return array with all auctions objects
       return jsonify(foundAuctions), 200
     else:
-      return jsonify({"err": "Failed to fetch the products"}), 400
+      return jsonify([]), 200
   except cx_Oracle.DatabaseError as e:
       errorObj, = e.args
       regexSearch = GetORAerrCode(errorObj)
